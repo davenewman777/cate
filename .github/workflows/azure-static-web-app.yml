@@ -23,12 +23,12 @@ jobs:
     # Step 3: Install dependencies
     - name: Install dependencies
       run: npm install
-      working-directory: ./cate
+      working-directory: ./catewebapp
 
     # Step 4: Build the app
     - name: Build the app
       run: npm run build
-      working-directory: ./cate
+      working-directory: ./catewebapp
 
     # Step 5: Deploy to Azure App Service
     - name: Deploy to Azure Web App
