@@ -23,7 +23,7 @@ jobs:
     # Step 3: Install dependencies
     - name: Install dependencies
       run: npm install
-      working-directory: ./cateweb
+      working-directory: ./cate
 
     # Step 4: Build the app
     - name: Build the app
