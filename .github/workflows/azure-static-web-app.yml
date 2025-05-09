@@ -18,15 +18,17 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18' # Match the Node.js version in Azure App Service
+        node-version: '22' # Match the Node.js version in Azure App Service
 
     # Step 3: Install dependencies
     - name: Install dependencies
       run: npm install
+      working-directory: ./cate
 
     # Step 4: Build the app
     - name: Build the app
       run: npm run build
+      working-directory: ./cate
 
     # Step 5: Deploy to Azure App Service
     - name: Deploy to Azure Web App
