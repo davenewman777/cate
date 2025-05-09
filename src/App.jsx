@@ -69,6 +69,31 @@ export default function App() {
     return totalComposite.toFixed(7);
   };
   
+  const [multiRegionSelections, setMultiRegionSelections] = useState(
+    Array(NUM_COLUMNS).fill("No")
+  );
+  
+  const handleMultiRegionChange = (colIndex, value) => {
+    const updatedSelections = [...multiRegionSelections];
+    updatedSelections[colIndex] = value;
+    setMultiRegionSelections(updatedSelections);
+  };
+  
+  const calculateTotalMultiRegion = () => {
+    let totalProbability = 1;
+  
+    multiRegionSelections.forEach((selection, colIndex) => {
+      if (selection === "Yes") {
+        const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
+        if (!isNaN(compositeSLA)) {
+          totalProbability *= compositeSLA; // Multiply probabilities for "Yes" columns
+        }
+      }
+    });
+  
+    return totalProbability < 1 ? `${(totalProbability * 100).toFixed(7)}%` : "N/A";
+  };
+
   const exportConfig = () => {
     const blob = new Blob([JSON.stringify(selections)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -180,10 +205,10 @@ export default function App() {
               </tr>
             ))}
             <tr className="bg-gray-400 text-black">
-  {["Global Tier", "Web Tier", "API Tier", "Data Tier", "Security", "Network", "Hybrid Connectivity"].map((tierName, colIndex) => (
-    <th key={`composite-heading-${colIndex}`} colSpan={2} className="px-4 py-2 border text-center">
-      {tierName}
-    </th>
+          {["Global Tier", "Web Tier", "API Tier", "Data Tier", "Security", "Network", "Hybrid Connectivity"].map((tierName, colIndex) => (
+            <th key={`composite-heading-${colIndex}`} colSpan={2} className="px-4 py-2 border text-center">
+         {tierName}
+        </th>
   ))}
   <th colSpan={2} className="px-4 py-2 border text-center font-bold">
     Total
@@ -279,6 +304,41 @@ export default function App() {
                     : ""}
                 </td>
               </tr>
+                    <tr className="bg-gray-200 font-semibold">
+                    {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                      colIndex === 0 ? (
+                        <td key={`multi-region-label-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center text-sm"></td>
+                      ) : (
+                        <td key={`multi-region-label-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center text-sm">
+                          Multiple Region Deployment
+                        </td>
+                      )
+                    ))}
+                    <td colSpan={2} className="border px-2 py-2 text-center text-sm font-bold">
+                      Multiple Region Deployment
+                    </td>
+                  </tr>
+                    <tr className="bg-gray-100">
+                    {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                      colIndex === 0 ? (
+                        <td key={`multi-region-dropdown-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center"></td>
+                      ) : (
+                        <td key={`multi-region-dropdown-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center">
+                          <select
+                            defaultValue="No"
+                            className="w-40 border p-1"
+                            onChange={(e) => handleMultiRegionChange(colIndex, e.target.value)}
+                            >
+                              <option value="No">No</option>
+                              <option value="Yes">Yes</option>
+                            </select>
+                          </td>
+                        )
+                      ))}
+                      <td colSpan={2} className="border px-2 py-2 text-center font-bold">
+                        {calculateTotalMultiRegion()}
+                      </td>
+                    </tr>
           </tbody>
         </table>
       </div>
