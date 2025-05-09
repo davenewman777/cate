@@ -24,6 +24,10 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    # Debug permissions
+    - name: Debug permissions
+      run: ls -la node_modules/.bin
+
     # Step 4: Build the app
     - name: Build the app
       run: npx vite build
