@@ -28,6 +28,10 @@ jobs:
     - name: Debug permissions
       run: ls -la node_modules/.bin
 
+    # Fix permissions for vite binary
+    - name: Fix permissions for vite
+      run: chmod +x node_modules/.bin/vite
+
     # Step 4: Build the app
     - name: Build the app
       run: npx vite build
