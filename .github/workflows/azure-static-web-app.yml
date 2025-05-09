@@ -24,15 +24,11 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    # Step 4: Add node_modules/.bin to PATH
-    - name: Add node_modules/.bin to PATH
-      run: echo "${{ github.workspace }}/node_modules/.bin" >> $GITHUB_PATH
-
-    # Step 5: Build the app
+    # Step 4: Build the app
     - name: Build the app
-      run: npm run build
+      run: npx vite build
 
-    # Step 6: Deploy to Azure App Service
+    # Step 5: Deploy to Azure App Service
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
