@@ -26,7 +26,7 @@ jobs:
 
     # Fix permissions for vite binary
     - name: Fix permissions for vite
-      run: chmod +x node_modules/.bin/vite
+      run: chmod +x node_modules/.bin/
 
     # Step 4: Build the app
     - name: Build the app
