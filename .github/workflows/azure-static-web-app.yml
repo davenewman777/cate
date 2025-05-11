@@ -20,13 +20,13 @@ jobs:
       with:
         node-version: '18' # Use Node.js 18 LTS for compatibility with Vite
 
-    # Step 3: Install dependencies
-    - name: Install dependencies
-      run: npm ci # Use `npm ci` for a clean install
-
-    # Step 4: Debug permissions (moved earlier)
+    # Step 3: Debug permissions (moved earlier)
     - name: Debug permissions
       run: ls -la node_modules/.bin
+
+    # Step 4: Install dependencies
+    - name: Install dependencies
+      run: npm ci # Use `npm ci` for a clean install
 
     # Step 5: Fix permissions for all binaries
     - name: Fix permissions for binaries
