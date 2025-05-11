@@ -18,7 +18,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22' # Use Node.js 18 LTS for compatibility with Vite
+        node-version: '22' 
 
     # Step 3: Clean node_modules
     - name: Clean node_modules
