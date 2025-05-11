@@ -20,27 +20,31 @@ jobs:
       with:
         node-version: '18' # Use Node.js 18 LTS for compatibility with Vite
 
-    # Step 3: Debug permissions (moved earlier)
-    - name: Debug permissions
-      run: ls -la node_modules/.bin
+    # Step 3: Clean node_modules
+    - name: Clean node_modules
+      run: npx rimraf node_modules
 
     # Step 4: Install dependencies
     - name: Install dependencies
       run: npm ci # Use `npm ci` for a clean install
 
-    # Step 5: Fix permissions for all binaries
+    # Step 5: Debug permissions
+    - name: Debug permissions
+      run: ls -la node_modules/.bin
+
+    # Step 6: Fix permissions for all binaries
     - name: Fix permissions for binaries
       run: chmod +x node_modules/.bin/*
 
-    # Step 6: Verify Vite binary
+    # Step 7: Verify Vite binary
     - name: Verify Vite binary
       run: node_modules/.bin/vite --version
 
-    # Step 7: Build the app
+    # Step 8: Build the app
     - name: Build the app
       run: node node_modules/.bin/vite build # Directly run the Vite binary
 
-    # Step 8: Deploy to Azure App Service
+    # Step 9: Deploy to Azure App Service
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
