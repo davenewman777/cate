@@ -46,5 +46,5 @@ jobs:
       with:
         app-name: cate # Replace with your Azure App Service name
         slot-name: production
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        publish-profile: ${{ secrets.CATE_APP_PUBLISH_PROFILE }} # Azure publish profile secret
         package: ./dist
