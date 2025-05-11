@@ -25,8 +25,12 @@ jobs:
       run: npm install
 
     # Fix permissions for vite binary
-    - name: Fix permissions for vite
+    - name: Fix permissions for modules
       run: chmod +x node_modules/
+
+    # Debug permissions
+    - name: Debug permissions
+      run: ls -la node_modules/.bin
 
     # Step 4: Build the app
     - name: Build the app
