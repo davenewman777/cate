@@ -1,4 +1,4 @@
-name: Deploy React App to Azure
+xname: Deploy React App to Azure
 
 on:
   push:
@@ -18,26 +18,25 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22' # Match the Node.js version in Azure App Service
+        node-version: '18' # Use Node.js 18 LTS for compatibility with Vite
 
     # Step 3: Install dependencies
     - name: Install dependencies
-      run: npm install
+      run: npm ci # Use `npm ci` for a clean install
 
-    # Debug permissions
+    # Step 4: Debug permissions
     - name: Debug permissions
       run: ls -la node_modules/.bin
 
-    # Fix permissions for vite binary
-    - name: Fix permissions for modules
-      run: chmod +x node_modules/
+    # Step 5: Fix permissions for Vite binary
+    - name: Fix permissions for Vite binary
+      run: chmod +x node_modules/.bin/vite
 
-    # Step 4: Build the app
-    - name: Install vite globally
-      run: npm install -g vite
-      
+    # Step 6: Build the app
+    - name: Build the app
+      run: npx vite build # Use `npx` to run Vite without global installation
 
-    # Step 5: Deploy to Azure App Service
+    # Step 7: Deploy to Azure App Service
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
