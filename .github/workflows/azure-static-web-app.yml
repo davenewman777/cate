@@ -26,11 +26,12 @@ jobs:
 
     # Fix permissions for vite binary
     - name: Fix permissions for vite
-      run: chmod +x node_modules/.bin/
+      run: chmod +x node_modules/
 
     # Step 4: Build the app
     - name: Build the app
       run: npx vite build
+      
 
     # Step 5: Deploy to Azure App Service
     - name: Deploy to Azure Web App
