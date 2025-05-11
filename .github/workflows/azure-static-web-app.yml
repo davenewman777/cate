@@ -33,8 +33,8 @@ jobs:
       run: chmod +x node_modules/
 
     # Step 4: Build the app
-    - name: Build the app
-      run: npx vite build
+    - name: Install vite globally
+      run: npm install -g vite
       
 
     # Step 5: Deploy to Azure App Service
