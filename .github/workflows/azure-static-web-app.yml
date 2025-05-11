@@ -20,6 +20,12 @@ jobs:
       with:
         node-version: '18' # Use Node.js 18 LTS for compatibility with Vite
 
+    # Step 2.5: Clean and reinstall dependencies
+    - name: Clean and reinstall dependencies
+      run: |
+        rm -rf node_modules
+        npm ci # Use `npm ci` for a clean install
+        
     # Step 3: Install dependencies
     - name: Install dependencies
       run: npm ci # Use `npm ci` for a clean install
