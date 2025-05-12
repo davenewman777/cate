@@ -11,7 +11,13 @@ export default function App() {
   const [slaOptions, setSlaOptions] = useState([]);
   const [slaMap, setSlaMap] = useState({});
   const [calculationModes, setCalculationModes] = useState(
-    Array(NUM_COLUMNS).fill("AND") // Default to AND for all columns
+    Array(NUM_COLUMNS).fill("AND")
+  );
+  const [zoneSelections, setZoneSelections] = useState(
+    Array(NUM_COLUMNS).fill("No")
+  );
+  const [multiRegionSelections, setMultiRegionSelections] = useState(
+    Array(NUM_COLUMNS).fill("No")
   );
   const fileInputRef = useRef();
 
@@ -40,6 +46,18 @@ export default function App() {
     setCalculationModes(updatedModes);
   };
 
+  const handleZoneChange = (colIndex, value) => {
+    const updated = [...zoneSelections];
+    updated[colIndex] = value;
+    setZoneSelections(updated);
+  };
+
+  const handleMultiRegionChange = (colIndex, value) => {
+    const updatedSelections = [...multiRegionSelections];
+    updatedSelections[colIndex] = value;
+    setMultiRegionSelections(updatedSelections);
+  };
+
   const getSLA = (service) => slaMap[service] || "";
 
   const getCompositeSLA = (columnIndex) => {
@@ -48,15 +66,20 @@ export default function App() {
       .filter(Boolean);
     if (slaValues.length === 0) return "";
 
+    let composite;
     if (calculationModes[columnIndex] === "AND") {
-      // AND logic: Multiply all SLAs
-      const composite = slaValues.reduce((acc, val) => acc * val, 1);
-      return composite.toFixed(7);
+      composite = slaValues.reduce((acc, val) => acc * val, 1);
     } else if (calculationModes[columnIndex] === "OR") {
-      // OR logic: Calculate the likelihood that all resources are NOT offline
-      const composite = 1 - slaValues.reduce((acc, val) => acc * (1 - val), 1);
-      return composite.toFixed(7);
+      composite = 1 - slaValues.reduce((acc, val) => acc * (1 - val), 1);
     }
+
+    // Adjust for zones if 2 or 3 are selected
+    const zones = parseInt(zoneSelections[columnIndex]);
+    if (zones === 2 || zones === 3) {
+      composite = 1 - Math.pow(1 - composite, zones);
+    }
+
+    return composite.toFixed(7);
   };
 
   const getTotalCompositeSLA = () => {
@@ -64,35 +87,47 @@ export default function App() {
     const validSLAs = compositeSLAs.filter(sla => sla !== "");
     if (validSLAs.length === 0) return "";
 
-    // AND logic for total composite SLA
     const totalComposite = validSLAs.reduce((acc, val) => acc * parseFloat(val), 1);
     return totalComposite.toFixed(7);
   };
-  
-  const [multiRegionSelections, setMultiRegionSelections] = useState(
-    Array(NUM_COLUMNS).fill("No")
-  );
-  
-  const handleMultiRegionChange = (colIndex, value) => {
-    const updatedSelections = [...multiRegionSelections];
-    updatedSelections[colIndex] = value;
-    setMultiRegionSelections(updatedSelections);
-  };
-  
+
   const calculateTotalMultiRegion = () => {
     let totalProbability = 1;
-  
     multiRegionSelections.forEach((selection, colIndex) => {
       if (selection === "Yes") {
         const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
         if (!isNaN(compositeSLA)) {
-          totalProbability *= compositeSLA; // Multiply probabilities for "Yes" columns
+          totalProbability *= compositeSLA;
         }
       }
     });
-  
     return totalProbability < 1 ? `${(totalProbability * 100).toFixed(7)}%` : "N/A";
   };
+
+const getTotalMultiRegionValue = () => {
+  let totalProbability = 1;
+  multiRegionSelections.forEach((selection, colIndex) => {
+    if (selection === "Yes") {
+      const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
+      if (!isNaN(compositeSLA)) {
+        totalProbability *= compositeSLA;
+      }
+    }
+  });
+  return totalProbability;
+};
+
+const getMultiRegionDowntimeMonth = () => {
+  const total = getTotalMultiRegionValue();
+  if (total === 0) return "";
+  return `${(43200 * (1 - total)).toFixed(2)} mins`;
+};
+
+const getMultiRegionDowntimeDay = () => {
+  const total = getTotalMultiRegionValue();
+  if (total === 0) return "";
+  return `${(1440 * (1 - total)).toFixed(2)} mins`;
+};
 
   const exportConfig = () => {
     const blob = new Blob([JSON.stringify(selections)], { type: "application/json" });
@@ -104,11 +139,10 @@ export default function App() {
     link.click();
     document.body.removeChild(link);
   };
-  
+
   const importConfig = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = evt => {
       try {
@@ -150,39 +184,39 @@ export default function App() {
 
       <div className="overflow-x-auto">
         <table className="table-auto border border-gray-300">
-        <thead>
-  <tr>
-    {["Global Tier", "Web Tier", "API Tier", "Data Tier", "Security", "Network", "Hybrid Connectivity"].map((tierName, colIndex) => (
-      <th
-        key={colIndex}
-        colSpan={2}
-        className="px-4 py-2 border text-center bg-gray-400 text-black"
-      >
-        {tierName}
-      </th>
-    ))}
-  </tr>
-  <tr>
-    {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
-      <>
-        <th key={`service-${colIndex}`} className="px-4 py-2 border text-center bg-gray-400 text-black">
-          Service
-        </th>
-        <th key={`sla-${colIndex}`} className="px-4 py-2 border text-center bg-gray-400 text-black">
-          SLA
-        </th>
-      </>
-    ))}
-  </tr>
-</thead>
+          <thead>
+            <tr>
+              {["Global Tier", "Web Tier", "API Tier", "Data Tier", "Security", "Network", "Hybrid Connectivity"].map((tierName, colIndex) => (
+                <th
+                  key={colIndex}
+                  colSpan={2}
+                  className="px-4 py-2 border text-center bg-gray-400 text-black"
+                >
+                  {tierName}
+                </th>
+              ))}
+            </tr>
+            <tr>
+              {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                <React.Fragment key={colIndex}>
+                  <th className="px-4 py-2 border text-center bg-gray-400 text-black">
+                    Service
+                  </th>
+                  <th className="px-4 py-2 border text-center bg-gray-400 text-black">
+                    SLA
+                  </th>
+                </React.Fragment>
+              ))}
+            </tr>
+          </thead>
           <tbody>
             {[...Array(NUM_ROWS)].map((_, rowIndex) => (
               <tr key={rowIndex}>
                 {[...Array(NUM_COLUMNS)].map((_, colIndex) => {
                   const selected = selections[colIndex][rowIndex];
                   return (
-                    <>
-                      <td key={`service-${colIndex}-${rowIndex}`} className="border px-2 py-1 text-center">
+                    <React.Fragment key={colIndex}>
+                      <td className="border px-2 py-1 text-center">
                         <select
                           value={selected}
                           onChange={e => handleChange(colIndex, rowIndex, e.target.value)}
@@ -196,24 +230,55 @@ export default function App() {
                           ))}
                         </select>
                       </td>
-                      <td key={`sla-${colIndex}-${rowIndex}`} className="border px-2 py-1 text-center">
+                      <td className="border px-2 py-1 text-center">
                         {selected ? `${(getSLA(selected) * 100).toFixed(3)}%` : ""}
                       </td>
-                    </>
+                    </React.Fragment>
                   );
                 })}
               </tr>
             ))}
+
+            {/* Composite Headings Row */}
             <tr className="bg-gray-400 text-black">
-          {["Global Tier", "Web Tier", "API Tier", "Data Tier", "Security", "Network", "Hybrid Connectivity"].map((tierName, colIndex) => (
-            <th key={`composite-heading-${colIndex}`} colSpan={2} className="px-4 py-2 border text-center">
-         {tierName}
-        </th>
-  ))}
-  <th colSpan={2} className="px-4 py-2 border text-center font-bold">
-    Total
-  </th>
-</tr>
+              {["Global Tier", "Web Tier", "API Tier", "Data Tier", "Security", "Network", "Hybrid Connectivity"].map((tierName, colIndex) => (
+                <th key={`composite-heading-${colIndex}`} colSpan={2} className="px-4 py-2 border text-center">
+                  {tierName}
+                </th>
+              ))}
+              <th colSpan={2} className="px-4 py-2 border text-center font-bold">
+                Total
+              </th>
+            </tr>
+
+            {/* Deployment to # of Zones Row */}
+            <tr className="bg-gray-200">
+              {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                colIndex === 0 ? (
+                  <td key={`zone-label-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center text-sm"></td>
+                ) : (
+                  <React.Fragment key={colIndex}>
+                    <td className="border px-2 py-2 text-center text-sm">
+                      Deployment to # of Zones
+                    </td>
+                    <td className="border px-2 py-2 text-center text-sm">
+                      <select
+                        value={zoneSelections[colIndex]}
+                        onChange={e => handleZoneChange(colIndex, e.target.value)}
+                        className="w-20 border p-1"
+                      >
+                        <option value="No">No</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                      </select>
+                    </td>
+                  </React.Fragment>
+                )
+              ))}
+            </tr>
+
+            {/* AND/OR Row */}
             <tr className="bg-gray-100 font-semibold">
               {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
                 <td key={`calculation-mode-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center text-sm">
@@ -242,103 +307,133 @@ export default function App() {
                 </td>
               ))}
             </tr>
-                <tr className="bg-gray-100 font-semibold">
-                {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
-                  <>
-                    <td key={`composite-label-${colIndex}`} className="border px-2 py-2 text-center text-sm">
-                      Composite Availability:
-                    </td>
-                    <td key={`composite-value-${colIndex}`} className="border px-2 py-2 text-center text-sm">
-                      {(parseFloat(getCompositeSLA(colIndex) || 0) * 100).toFixed(7)}%
-                    </td>
-                  </>
-                ))}
+
+            {/* Composite Availability Row */}
+            <tr className="bg-gray-100 font-semibold">
+              {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                <React.Fragment key={colIndex}>
+                  <td className="border px-2 py-2 text-center text-sm">
+                    Composite Availability:
+                  </td>
+                  <td className="border px-2 py-2 text-center text-sm">
+                    {(parseFloat(getCompositeSLA(colIndex) || 0) * 100).toFixed(7)}%
+                  </td>
+                </React.Fragment>
+              ))}
+              <td className="border px-2 py-2 text-center text-sm font-bold">
+                Total Composite Availability:
+              </td>
+              <td className="border px-2 py-2 text-center text-sm font-bold">
+                {(parseFloat(getTotalCompositeSLA() || 0) * 100).toFixed(7)}%
+              </td>
+            </tr>
+
+            {/* Max Minutes of Downtime (Month) Row */}
+            <tr className="bg-gray-100">
+              {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                <React.Fragment key={colIndex}>
+                  <td className="border px-2 py-2 text-center text-sm">
+                    Max Minutes of Downtime (Month):
+                  </td>
+                  <td className="border px-2 py-2 text-center text-sm">
+                    {parseFloat(getCompositeSLA(colIndex) || 0) > 0
+                      ? `${(43200 * (1 - parseFloat(getCompositeSLA(colIndex) || 0))).toFixed(2)} mins`
+                      : ""}
+                  </td>
+                </React.Fragment>
+              ))}
+              <td className="border px-2 py-2 text-center text-sm font-bold">
+                Total Max Minutes of Downtime (Month):
+              </td>
+              <td className="border px-2 py-2 text-center text-sm font-bold">
+                {parseFloat(getTotalCompositeSLA() || 0) > 0
+                  ? `${(43200 * (1 - parseFloat(getTotalCompositeSLA() || 0))).toFixed(2)} mins`
+                  : ""}
+              </td>
+            </tr>
+
+            {/* Max Minutes of Downtime (Day) Row */}
+            <tr className="bg-gray-100">
+              {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                <React.Fragment key={colIndex}>
+                  <td className="border px-2 py-2 text-center text-sm">
+                    Max Minutes of Downtime (Day):
+                  </td>
+                  <td className="border px-2 py-2 text-center text-sm">
+                    {parseFloat(getCompositeSLA(colIndex) || 0) > 0
+                      ? `${(1440 * (1 - parseFloat(getCompositeSLA(colIndex) || 0))).toFixed(2)} mins`
+                      : ""}
+                  </td>
+                </React.Fragment>
+              ))}
+              <td className="border px-2 py-2 text-center text-sm font-bold">
+                Total Max Minutes of Downtime (Day):
+              </td>
+              <td className="border px-2 py-2 text-center text-sm font-bold">
+                {parseFloat(getTotalCompositeSLA() || 0) > 0
+                  ? `${(1440 * (1 - parseFloat(getTotalCompositeSLA() || 0))).toFixed(2)} mins`
+                  : ""}
+              </td>
+            </tr>
+
+            {/* Multiple Region Deployment Row */}
+            <tr className="bg-gray-200 font-semibold">
+              {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                colIndex === 0 ? (
+                  <td key={`multi-region-label-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center text-sm"></td>
+                ) : (
+                  <td key={`multi-region-label-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center text-sm">
+                    Multiple Region Deployment
+                  </td>
+                )
+              ))}
+              <td colSpan={2} className="border px-2 py-2 text-center text-sm font-bold">
+                Multiple Region Deployment
+              </td>
+            </tr>
+            <tr className="bg-gray-100">
+              {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
+                colIndex === 0 ? (
+                  <td key={`multi-region-dropdown-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center"></td>
+                ) : (
+                  <td key={`multi-region-dropdown-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center">
+                    <select
+                      value={multiRegionSelections[colIndex]}
+                      className="w-40 border p-1"
+                      onChange={(e) => handleMultiRegionChange(colIndex, e.target.value)}
+                    >
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
+                    </select>
+                  </td>
+                )
+              ))}
+              <td colSpan={2} className="border px-2 py-2 text-center font-bold">
+                {calculateTotalMultiRegion()}
+              </td>
+            </tr>
+            <tr className="bg-gray-100">
+            {[...Array(NUM_COLUMNS * 2)].map((_, idx) => (
+              <td key={`multi-region-downtime-month-${idx}`} className="border px-2 py-2 text-center text-sm"></td>
+        ))}
+            <td className="border px-2 py-2 text-center text-sm font-bold">
+               Max Minutes of Downtime (Month):
+           </td>
+            <td className="border px-2 py-2 text-center text-sm font-bold">
+               {getMultiRegionDowntimeMonth()}
+            </td>
+            </tr>
+          <tr className="bg-gray-100">
+              {[...Array(NUM_COLUMNS * 2)].map((_, idx) => (
+                <td key={`multi-region-downtime-day-${idx}`} className="border px-2 py-2 text-center text-sm"></td>
+       ))}
+              <td className="border px-2 py-2 text-center text-sm font-bold">
+              Max Minutes of Downtime (Day):
+               </td>
                 <td className="border px-2 py-2 text-center text-sm font-bold">
-                  Total Composite Availability:
+                      {getMultiRegionDowntimeDay()}
                 </td>
-                <td className="border px-2 py-2 text-center text-sm font-bold">
-                  {(parseFloat(getTotalCompositeSLA() || 0) * 100).toFixed(7)}%
-                </td>
-              </tr>
-              <tr className="bg-gray-100">
-                {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
-                  <>
-                    <td key={`downtime-month-label-${colIndex}`} className="border px-2 py-2 text-center text-sm">
-                      Max Downtime (Month):
-                    </td>
-                    <td key={`downtime-month-value-${colIndex}`} className="border px-2 py-2 text-center text-sm">
-                      {parseFloat(getCompositeSLA(colIndex) || 0) > 0
-                        ? `${(43200 * (1 - parseFloat(getCompositeSLA(colIndex) || 0))).toFixed(2)} mins`
-                        : ""}
-                    </td>
-                  </>
-                ))}
-                <td className="border px-2 py-2 text-center text-sm font-bold">
-                  Total Max Downtime (Month):
-                </td>
-                <td className="border px-2 py-2 text-center text-sm font-bold">
-                  {parseFloat(getTotalCompositeSLA() || 0) > 0
-                    ? `${(43200 * (1 - parseFloat(getTotalCompositeSLA() || 0))).toFixed(2)} mins`
-                    : ""}
-                </td>
-              </tr>
-              <tr className="bg-gray-100">
-                {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
-                  <>
-                    <td key={`downtime-day-label-${colIndex}`} className="border px-2 py-2 text-center text-sm">
-                      Max Downtime (Day):
-                    </td>
-                    <td key={`downtime-day-value-${colIndex}`} className="border px-2 py-2 text-center text-sm">
-                      {parseFloat(getCompositeSLA(colIndex) || 0) > 0
-                        ? `${(1440 * (1 - parseFloat(getCompositeSLA(colIndex) || 0))).toFixed(2)} mins`
-                        : ""}
-                    </td>
-                  </>
-                ))}
-                <td className="border px-2 py-2 text-center text-sm font-bold">
-                  Total Max Downtime (Day):
-                </td>
-                <td className="border px-2 py-2 text-center text-sm font-bold">
-                  {parseFloat(getTotalCompositeSLA() || 0) > 0
-                    ? `${(1440 * (1 - parseFloat(getTotalCompositeSLA() || 0))).toFixed(2)} mins`
-                    : ""}
-                </td>
-              </tr>
-                    <tr className="bg-gray-200 font-semibold">
-                    {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
-                      colIndex === 0 ? (
-                        <td key={`multi-region-label-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center text-sm"></td>
-                      ) : (
-                        <td key={`multi-region-label-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center text-sm">
-                          Multiple Region Deployment
-                        </td>
-                      )
-                    ))}
-                    <td colSpan={2} className="border px-2 py-2 text-center text-sm font-bold">
-                      Multiple Region Deployment
-                    </td>
-                  </tr>
-                    <tr className="bg-gray-100">
-                    {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
-                      colIndex === 0 ? (
-                        <td key={`multi-region-dropdown-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center"></td>
-                      ) : (
-                        <td key={`multi-region-dropdown-${colIndex}`} colSpan={2} className="border px-2 py-2 text-center">
-                          <select
-                            defaultValue="No"
-                            className="w-40 border p-1"
-                            onChange={(e) => handleMultiRegionChange(colIndex, e.target.value)}
-                            >
-                              <option value="No">No</option>
-                              <option value="Yes">Yes</option>
-                            </select>
-                          </td>
-                        )
-                      ))}
-                      <td colSpan={2} className="border px-2 py-2 text-center font-bold">
-                        {calculateTotalMultiRegion()}
-                      </td>
-                    </tr>
+            </tr>
           </tbody>
         </table>
       </div>
