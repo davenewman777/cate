@@ -61,4 +61,4 @@ jobs:
           app-name: 'cateapp'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B00980644CB54FEC9E211BBD0E9A2B18 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CAA7BDC35C70442F888A00BE22A0F4F0 }}
