@@ -313,10 +313,10 @@ const getMultiRegionDowntimeDay = () => {
               {[...Array(NUM_COLUMNS)].map((_, colIndex) => (
                 <React.Fragment key={colIndex}>
                   <td className="border px-2 py-2 text-center text-sm">
-                    Composite Availability:
+                    Composite Availability Target:
                   </td>
                   <td className="border px-2 py-2 text-center text-sm">
-                    {(parseFloat(getCompositeSLA(colIndex) || 0) * 100).toFixed(8)}%
+                    {(parseFloat(getCompositeSLA(colIndex) || 0) * 100).toFixed(9)}%
                   </td>
                 </React.Fragment>
               ))}
@@ -324,7 +324,7 @@ const getMultiRegionDowntimeDay = () => {
                 Total Composite Availability:
               </td>
               <td className="border px-2 py-2 text-center text-sm font-bold">
-                {(parseFloat(getTotalCompositeSLA() || 0) * 100).toFixed(8)}%
+                {(parseFloat(getTotalCompositeSLA() || 0) * 100).toFixed(9)}%
               </td>
             </tr>
 
