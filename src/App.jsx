@@ -316,7 +316,7 @@ const getMultiRegionDowntimeDay = () => {
                     Composite Availability:
                   </td>
                   <td className="border px-2 py-2 text-center text-sm">
-                    {(parseFloat(getCompositeSLA(colIndex) || 0) * 100).toFixed(7)}%
+                    {(parseFloat(getCompositeSLA(colIndex) || 0) * 100).toFixed(8)}%
                   </td>
                 </React.Fragment>
               ))}
@@ -324,7 +324,7 @@ const getMultiRegionDowntimeDay = () => {
                 Total Composite Availability:
               </td>
               <td className="border px-2 py-2 text-center text-sm font-bold">
-                {(parseFloat(getTotalCompositeSLA() || 0) * 100).toFixed(7)}%
+                {(parseFloat(getTotalCompositeSLA() || 0) * 100).toFixed(8)}%
               </td>
             </tr>
 
