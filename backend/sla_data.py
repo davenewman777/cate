@@ -259,3 +259,21 @@ SLA_DATA = [
 def get_sla(service_name: str) -> float | None:
     match = next((s for s in SLA_DATA if s["service"] == service_name), None)
     return match["sla"] if match else None
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# Enable CORS for local frontend development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/api/sla")
+def get_sla_data():
+    return SLA_DATA
