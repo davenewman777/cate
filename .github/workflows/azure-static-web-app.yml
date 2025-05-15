@@ -27,6 +27,7 @@ jobs:
       # Step 4: Install dependencies
       - name: Install dependencies
         run: npm ci # Use `npm ci` for a clean install
+        working-directory: ./frontend # Ensure the working directory is set to the root of your project
 
       # Step 5: Fix permissions for all binaries
       - name: Fix permissions for binaries
@@ -39,6 +40,7 @@ jobs:
       # Step 6: Build the app
       - name: Build the app
         run: node node_modules/.bin/vite build # Directly run the Vite binary
+        working-directory: ./frontend
 
       # Step 6.5: List all files and permissions
       - name: List all files and permissions
