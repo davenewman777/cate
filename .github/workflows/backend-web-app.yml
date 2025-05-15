@@ -29,6 +29,6 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: catewebapp
+          app-name: catebackend # Replace with your Azure App Service name
           publish-profile: ${{ secrets.CATE_BACKEND_PUBLISH_PROFILE }}
           package: ./node-backend
