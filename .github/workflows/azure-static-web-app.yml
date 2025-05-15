@@ -29,20 +29,12 @@ jobs:
         run: npm ci # Use `npm ci` for a clean install
         working-directory: ./frontend # Ensure the working directory is set to the root of your project
 
-      # Step 5: Verify Vite binary
-      - name: Verify Vite binary
-        run: node_modules/.bin/vite --version
-
-      # Step 6: Build the app
+      # Step 5: Build the app
       - name: Build the app
         run: node node_modules/.bin/vite build # Directly run the Vite binary
         working-directory: ./frontend
 
-      # Step 6.5: List all files and permissions
-      - name: List all files and permissions
-        run: ls -lR
-
-      # Step 7: Deploy to Azure App Service
+      # Step 6: Deploy to Azure App Service
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
