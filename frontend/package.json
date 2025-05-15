@@ -1,6 +1,9 @@
 {
   "name": "sla-frontend",
   "version": "1.0.0",
+    "engines": {
+    "node": ">=22.0.0"
+    }, 
   "scripts": {
     "dev": "npx vite",
     "build": "npx vite build",
