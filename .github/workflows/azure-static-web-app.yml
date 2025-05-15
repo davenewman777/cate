@@ -10,42 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-    # Step 2: Set up Node.js
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22'
 
-    # Step 3: Clean node_modules
-    # - name: Clean node_modules
-    #   run: npx rimraf node_modules
+      # Step 3: Clean node_modules
+      # - name: Clean node_modules
+      #   run: npx rimraf node_modules
 
-    # Step 4: Install dependencies
+      # Step 4: Install dependencies
       - name: Install dependencies
         run: npm ci # Use `npm ci` for a clean install
 
-    # Step 5: Fix permissions for all binaries
+      # Step 5: Fix permissions for all binaries
       - name: Fix permissions for binaries
         run: chmod +x node_modules/.bin/*
 
-    # Step 5.5: Verify Vite binary
+      # Step 5.5: Verify Vite binary
       - name: Verify Vite binary
         run: node_modules/.bin/vite --version
 
-    # Step 6: Build the app
+      # Step 6: Build the app
       - name: Build the app
         run: node node_modules/.bin/vite build # Directly run the Vite binary
 
-    # Step 6.5: List all files and permissions
+      # Step 6.5: List all files and permissions
       - name: List all files and permissions
         run: ls -lR
 
-
-    # Step 7: Deploy to Azure App Service
+      # Step 7: Deploy to Azure App Service
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
