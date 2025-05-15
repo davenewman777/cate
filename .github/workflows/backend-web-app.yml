@@ -24,7 +24,11 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Archive backend for deployment
-        run: zip -r backend.zip backend
+        run: |
+          cd backend
+          zip -r ../backend.zip .
+        working-directory: ./backend  
+
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
