@@ -29,11 +29,7 @@ jobs:
         run: npm ci # Use `npm ci` for a clean install
         working-directory: ./frontend # Ensure the working directory is set to the root of your project
 
-      # Step 5: Fix permissions for all binaries
-      - name: Fix permissions for binaries
-        run: chmod +x node_modules/.bin/*
-
-      # Step 5.5: Verify Vite binary
+      # Step 5: Verify Vite binary
       - name: Verify Vite binary
         run: node_modules/.bin/vite --version
 
