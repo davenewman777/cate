@@ -141,7 +141,7 @@ SLA_DATA = [
     {"service": "Cosmos DB for Table - Multi-Region Write", "sla": 0.99999},
     {"service": "Cosmos DB for Table - Single Region", "sla": 0.9999},
     {"service": "Cosmos DB for Table - Zone Redundant", "sla": 0.99995},
-    {"service": "Data Lakje Analytics", "sla": 0.999},
+    {"service": "Data Lake Analytics", "sla": 0.999},
     {"service": "Defender External Attack Surface Management", "sla": 0.999},
     {"service": "Duet Enterprise Online", "sla": 0.999},
     {"service": "Dynamics 365 Business Central", "sla": 0.999},

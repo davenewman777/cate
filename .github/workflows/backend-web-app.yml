@@ -1,37 +1,39 @@
-name: Deploy FastAPI Backend to Azure
+name: Deploy React App to Azure
 
 on:
   push:
     branches:
-      - main  # or your deployment branch
+      - main  # Trigger deployment on pushes to the main branch
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: '3.13'
+          node-version: '22'
 
+      # Step 4: Install dependencies
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-        working-directory: ./backend 
+        run: npm ci # Use `npm ci` for a clean install
+        working-directory: ./node-backend # Ensure the working directory is set to the root of your project
 
-      - name: Archive backend for deployment
-        run: |
-          zip -r ../backend.zip .
-        working-directory: ./backend  
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./node-backend
 
+      # Step 5: Deploy to Azure App Service
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: catebackend # e.g. catebackend
-          publish-profile: ${{ secrets.CATE_BACKEND_PUBLISH_PROFILE }}
-          package: backend.zip
+          app-name: catewebapp
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./node-backend
