@@ -31,7 +31,7 @@ jobs:
 
       # Step 5: Build the app
       - name: Build the app
-        run: node node_modules/.bin/vite build # Directly run the Vite binary
+        run: npx vite build
         working-directory: ./frontend
 
       # Step 6: Deploy to Azure App Service
