@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 
 const NUM_ROWS = 12;
 const NUM_COLUMNS = 7;
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = 'http://catebackend-hzf8b0crd0bteveg.canadacentral-01.azurewebsites.net/api';
 
 export default function App() {
   const [selections, setSelections] = useState(
