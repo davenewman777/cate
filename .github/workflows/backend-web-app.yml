@@ -25,10 +25,8 @@ jobs:
 
       - name: Archive backend for deployment
         run: |
-          cd backend
           zip -r ../backend.zip .
         working-directory: ./backend  
-
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
