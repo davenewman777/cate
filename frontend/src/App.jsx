@@ -104,30 +104,30 @@ export default function App() {
     return totalProbability < 1 ? `${(totalProbability * 100).toFixed(7)}%` : "N/A";
   };
 
-const getTotalMultiRegionValue = () => {
-  let totalProbability = 1;
-  multiRegionSelections.forEach((selection, colIndex) => {
-    if (selection === "Yes") {
-      const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
-      if (!isNaN(compositeSLA)) {
-        totalProbability *= compositeSLA;
+  const getTotalMultiRegionValue = () => {
+    let totalProbability = 1;
+    multiRegionSelections.forEach((selection, colIndex) => {
+      if (selection === "Yes") {
+        const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
+        if (!isNaN(compositeSLA)) {
+          totalProbability *= compositeSLA;
+        }
       }
-    }
-  });
-  return totalProbability;
-};
+    });
+    return totalProbability;
+  };
 
-const getMultiRegionDowntimeMonth = () => {
-  const total = getTotalMultiRegionValue();
-  if (total === 0) return "";
-  return `${(43200 * (1 - total)).toFixed(2)} mins`;
-};
+  const getMultiRegionDowntimeMonth = () => {
+    const total = getTotalMultiRegionValue();
+    if (total === 0) return "";
+    return `${(43200 * (1 - total)).toFixed(2)} mins`;
+  };
 
-const getMultiRegionDowntimeDay = () => {
-  const total = getTotalMultiRegionValue();
-  if (total === 0) return "";
-  return `${(1440 * (1 - total)).toFixed(2)} mins`;
-};
+  const getMultiRegionDowntimeDay = () => {
+    const total = getTotalMultiRegionValue();
+    if (total === 0) return "";
+    return `${(1440 * (1 - total)).toFixed(2)} mins`;
+  };
 
   const exportConfig = () => {
     const blob = new Blob([JSON.stringify(selections)], { type: "application/json" });
@@ -159,11 +159,25 @@ const getMultiRegionDowntimeDay = () => {
     reader.readAsText(file);
   };
 
+  // --- Clear All Handler ---
+  const handleClearAll = () => {
+    setSelections(Array(NUM_COLUMNS).fill().map(() => Array(NUM_ROWS).fill("")));
+    setCalculationModes(Array(NUM_COLUMNS).fill("AND"));
+    setZoneSelections(Array(NUM_COLUMNS).fill("No"));
+    setMultiRegionSelections(Array(NUM_COLUMNS).fill("No"));
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4 text-center">Composite Availability Target Estimator</h1>
 
       <div className="mb-4 flex gap-3 justify-end">
+        <button
+          onClick={handleClearAll}
+          className="bg-red-500 text-white px-3 py-1 rounded"
+        >
+          Clear All
+        </button>
         <button onClick={exportConfig} className="bg-blue-500 text-white px-3 py-1 rounded">
           Export Config
         </button>

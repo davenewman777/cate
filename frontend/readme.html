@@ -1,0 +1,34 @@
+<head></head>
+<body>
+    <h1>Composite Availability Target Estimator</h1>
+    <h2>Overview</h2>
+- This tool assists in calculating an estimated composite availability target 
+    for a given set of critical flows through an application workload.
+- The calculated estimate is intended to be used as a <b>rough-order-of-magnitude (ROM)   
+    estimate for the general availability</b> of a workload based on the design and dependency 
+    chain of each critical flow.
+- While the calculated estimate is based on Microsoft published Service Level Agreements (SLAs)
+    for individual cloud services. 
+
+    <h2>This composite estimate does not represent a financially backed SLA guarantee and
+    not eligible for Service Credits.</h2>
+
+- Individual service SLAs are summarized on the SLA worksheet tab for easy reference.  
+    Full SLA definitions can be referenced at the this <a href="https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1">LINK</a>
+
+
+Usage:
+1. Start with an understanding of the critical application flow and the dependencies on Azure services for a flow within a workload in Azure.
+2. In each grouping of services, use the dropdown list to select the cloud services used for that step in the critical application flow.
+4. At the bottom of each group, select the flags based on how these services are deployed and leveraged in the critical application flow.
+ 4a. Zonal Deployment: Select "No" for deployments not explicitly pinned to one or more Zones, or # of Zones for zonal deployments that are explicitly pinned to one or more Zones.
+ 4b. AND/OR Grouping: If all services must be available in that group, select AND.  If only one of the services must be available, select OR.
+ 4c. If group is deployed to multiple Azure regions, select YES.  If using Active / Passive BCDR approach across multiple regions, note that RTO must be achievable within the "Projected Downtime" to attribute to an improved availability target.
+
+
+
+ - Some services have multiple SLA option for non-zonal, zonal, zone redundant and multi-region deployments.
+  If one of these exist, choose that option and do not set the "Zonal" flag to 1, 2 or 3 zones for these as the availability for these resources are 
+  accounted for with the different SLA categories.
+
+ </body>
