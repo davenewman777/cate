@@ -33,7 +33,7 @@ jobs:
         run: npx vite build
         working-directory: ./frontend
 
-      # Debugging step
+      # Debugging 
       - name: Debug env
         run: |
           echo "CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}"
