@@ -37,5 +37,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: catebackend1   # or catewebapp for frontend
-          package: ./node-backend # or ./frontend/dist for frontend
+          app-name: catebackend1  
+          package: ./node-backend 
