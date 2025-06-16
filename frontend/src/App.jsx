@@ -91,37 +91,46 @@ export default function App() {
     return totalComposite.toFixed(7);
   };
 
-  const calculateTotalMultiRegion = () => {
-    let totalProbability = 1;
-    multiRegionSelections.forEach((selection, colIndex) => {
-      if (selection === "Yes") {
-        const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
-        if (!isNaN(compositeSLA)) {
-          totalProbability *= compositeSLA;
+    const calculateTotalMultiRegion = () => {
+      // Probability all selected regions are down
+      let allDownProbability = 1;
+      let anySelected = false;
+      multiRegionSelections.forEach((selection, colIndex) => {
+        if (selection === "Yes") {
+          const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
+          if (!isNaN(compositeSLA)) {
+            allDownProbability *= (1 - compositeSLA);
+            anySelected = true;
+          }
         }
-      }
-    });
-    return totalProbability < 1 ? `${(totalProbability * 100).toFixed(7)}%` : "N/A";
-  };
-
-  const getTotalMultiRegionValue = () => {
-    let totalProbability = 1;
-    multiRegionSelections.forEach((selection, colIndex) => {
-      if (selection === "Yes") {
-        const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
-        if (!isNaN(compositeSLA)) {
-          totalProbability *= compositeSLA;
+      });
+      if (!anySelected) return "N/A";
+      const combinedSLA = 1 - allDownProbability;
+      return `${(combinedSLA * 100).toFixed(7)}%`;
+    };
+  
+    const getTotalMultiRegionValue = () => {
+      // Probability all selected regions are down
+      let allDownProbability = 1;
+      let anySelected = false;
+      multiRegionSelections.forEach((selection, colIndex) => {
+        if (selection === "Yes") {
+          const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
+          if (!isNaN(compositeSLA)) {
+            allDownProbability *= (1 - compositeSLA);
+            anySelected = true;
+          }
         }
-      }
-    });
-    return totalProbability;
-  };
-
-  const getMultiRegionDowntimeMonth = () => {
-    const total = getTotalMultiRegionValue();
-    if (total === 0) return "";
-    return `${(43200 * (1 - total)).toFixed(2)} mins`;
-  };
+      });
+      if (!anySelected) return 0;
+      return 1 - allDownProbability;
+    };
+  
+    const getMultiRegionDowntimeMonth = () => {
+      const total = getTotalMultiRegionValue();
+      if (total === 0) return "";
+      return `${(43200 * (1 - total)).toFixed(2)} mins`;
+    };
 
   const getMultiRegionDowntimeDay = () => {
     const total = getTotalMultiRegionValue();
