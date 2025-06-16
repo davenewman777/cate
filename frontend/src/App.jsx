@@ -91,40 +91,55 @@ export default function App() {
     return totalComposite.toFixed(7);
   };
 
-    const calculateTotalMultiRegion = () => {
-      // Probability all selected regions are down
-      let allDownProbability = 1;
-      let anySelected = false;
-      multiRegionSelections.forEach((selection, colIndex) => {
-        if (selection === "Yes") {
-          const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
-          if (!isNaN(compositeSLA)) {
-            allDownProbability *= (1 - compositeSLA);
-            anySelected = true;
-          }
+// ...existing code...
+
+  const calculateTotalMultiRegion = () => {
+    // Gather composite SLAs for all selected regions
+    const selectedSLAs = [];
+    multiRegionSelections.forEach((selection, colIndex) => {
+      if (selection === "Yes") {
+        const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
+        if (!isNaN(compositeSLA)) {
+          selectedSLAs.push(compositeSLA);
         }
-      });
-      if (!anySelected) return "N/A";
-      const combinedSLA = 1 - allDownProbability;
-      return `${(combinedSLA * 100).toFixed(7)}%`;
-    };
-  
-    const getTotalMultiRegionValue = () => {
-      // Probability all selected regions are down
-      let allDownProbability = 1;
-      let anySelected = false;
-      multiRegionSelections.forEach((selection, colIndex) => {
-        if (selection === "Yes") {
-          const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
-          if (!isNaN(compositeSLA)) {
-            allDownProbability *= (1 - compositeSLA);
-            anySelected = true;
-          }
+      }
+    });
+    if (selectedSLAs.length === 0) return "N/A";
+    let combinedSLA;
+    if (selectedSLAs.length === 1) {
+      // Two regions with the same SLA (active-active)
+      const sla = selectedSLAs[0];
+      combinedSLA = 1 - Math.pow(1 - sla, 2);
+    } else {
+      // Multiple independent regions
+      const allDownProbability = selectedSLAs.reduce((acc, sla) => acc * (1 - sla), 1);
+      combinedSLA = 1 - allDownProbability;
+    }
+    return `${(combinedSLA * 100).toFixed(7)}%`;
+  };
+
+  const getTotalMultiRegionValue = () => {
+    // Gather composite SLAs for all selected regions
+    const selectedSLAs = [];
+    multiRegionSelections.forEach((selection, colIndex) => {
+      if (selection === "Yes") {
+        const compositeSLA = parseFloat(getCompositeSLA(colIndex) || 0);
+        if (!isNaN(compositeSLA)) {
+          selectedSLAs.push(compositeSLA);
         }
-      });
-      if (!anySelected) return 0;
+      }
+    });
+    if (selectedSLAs.length === 0) return 0;
+    if (selectedSLAs.length === 1) {
+      const sla = selectedSLAs[0];
+      return 1 - Math.pow(1 - sla, 2);
+    } else {
+      const allDownProbability = selectedSLAs.reduce((acc, sla) => acc * (1 - sla), 1);
       return 1 - allDownProbability;
-    };
+    }
+  };
+
+// ...existing code...
   
     const getMultiRegionDowntimeMonth = () => {
       const total = getTotalMultiRegionValue();
