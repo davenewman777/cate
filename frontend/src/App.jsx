@@ -79,7 +79,7 @@ export default function App() {
       composite = 1 - Math.pow(1 - composite, zones);
     }
 
-    return composite.toFixed(7);
+    return composite.toFixed(9);
   };
 
   const getTotalCompositeSLA = () => {
@@ -88,7 +88,7 @@ export default function App() {
     if (validSLAs.length === 0) return "";
 
     const totalComposite = validSLAs.reduce((acc, val) => acc * parseFloat(val), 1);
-    return totalComposite.toFixed(7);
+    return totalComposite.toFixed(9);
   };
 
 // ...existing code...
@@ -115,7 +115,7 @@ export default function App() {
       const allDownProbability = selectedSLAs.reduce((acc, sla) => acc * (1 - sla), 1);
       combinedSLA = 1 - allDownProbability;
     }
-    return `${(combinedSLA * 100).toFixed(7)}%`;
+    return `${(combinedSLA * 100).toFixed(9)}%`;
   };
 
   const getTotalMultiRegionValue = () => {
